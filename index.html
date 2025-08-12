@@ -9,75 +9,87 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #ffffff;
             color: #333;
             display: flex;
             flex-direction: column;
+            align-items: center;
             height: 100vh;
         }
-        header {
-            background-color: #007bff;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-        .container {
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-transform: uppercase;
             display: flex;
-            flex: 1;
-            overflow: hidden;
+            align-items: center;
+            justify-content: center;
         }
-        .video-section, .pdf-section {
-            flex: 1;
-            padding: 10px;
-            box-sizing: border-box;
+        .pin-icon {
+            color: #ff4500; /* Red pin icon */
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        .video-container {
+            width: 80%;
+            max-width: 800px;
+            background-color: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
         video {
             width: 100%;
             height: auto;
-            max-height: 100%;
-            background-color: black;
         }
-        iframe {
-            width: 100%;
-            height: 100%;
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .download-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
             border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
         }
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            .video-section {
-                order: 1;
-                height: 50vh; /* Video takes half screen on mobile */
-            }
-            .pdf-section {
-                order: 2;
-                height: 50vh; /* PDF below video */
-                overflow-y: auto;
-            }
-            video {
-                height: 100%; /* Ensure video fills its section */
-            }
+        .download-btn:hover {
+            background-color: #0056b3;
         }
         .error {
             color: red;
             text-align: center;
             padding: 20px;
         }
+        @media (max-width: 768px) {
+            .video-container {
+                width: 100%;
+            }
+            .buttons {
+                flex-direction: row;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-    <header id="title-header">Lecture Player</header>
-    <div class="container">
-        <div class="video-section">
-            <video id="video-player" controls playsinline>
-                <source id="video-source" src="" type="video/webm">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        <div class="pdf-section">
-            <iframe id="pdf-viewer" src=""></iframe>
-        </div>
+    <div class="title">
+        <span class="pin-icon">📌</span> <!-- Using emoji for pin icon; can replace with SVG if needed -->
+        <span id="lecture-title">Lecture Player</span>
+    </div>
+    <div class="video-container">
+        <video id="video-player" controls playsinline>
+            <source id="video-source" src="" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div class="buttons">
+        <a id="download-video" class="download-btn" href="#" target="_blank">Download Video</a>
+        <a id="download-notes" class="download-btn" href="#" target="_blank">Download Notes</a>
     </div>
 
     <script>
@@ -95,28 +107,35 @@
         const params = getQueryParams();
         const videoPlayer = document.getElementById('video-player');
         const videoSource = document.getElementById('video-source');
-        const pdfViewer = document.getElementById('pdf-viewer');
-        const titleHeader = document.getElementById('title-header');
+        const downloadVideo = document.getElementById('download-video');
+        const downloadNotes = document.getElementById('download-notes');
+        const lectureTitle = document.getElementById('lecture-title');
 
         if (params.title) {
-            titleHeader.textContent = decodeURIComponent(params.title);
+            lectureTitle.textContent = decodeURIComponent(params.title).toUpperCase();
             document.title = decodeURIComponent(params.title);
         }
 
         if (params.video) {
-            videoSource.src = decodeURIComponent(params.video);
+            const videoUrl = decodeURIComponent(params.video);
+            videoSource.src = videoUrl;
             videoPlayer.load();
             videoPlayer.play().catch(error => {
                 console.error('Autoplay failed:', error);
             });
+            downloadVideo.href = videoUrl;
+            downloadVideo.download = 'lecture_video.webm'; // Suggest filename
         } else {
-            document.querySelector('.video-section').innerHTML = '<p class="error">No video URL provided.</p>';
+            document.querySelector('.video-container').innerHTML = '<p class="error">No video URL provided.</p>';
+            downloadVideo.style.display = 'none';
         }
 
         if (params.pdf) {
-            pdfViewer.src = decodeURIComponent(params.pdf) + '#toolbar=0&navpanes=0&scrollbar=0'; // Hide PDF toolbar for cleaner view
+            const pdfUrl = decodeURIComponent(params.pdf);
+            downloadNotes.href = pdfUrl;
+            downloadNotes.download = 'lecture_notes.pdf'; // Suggest filename
         } else {
-            document.querySelector('.pdf-section').innerHTML = '<p class="error">No PDF URL provided.</p>';
+            downloadNotes.style.display = 'none';
         }
 
         // Fullscreen handler for mobile
