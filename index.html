@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 LECTURE PLAYER</title>
+    <title>🚀 Lecture Player</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,13 +17,11 @@
             justify-content: center;
             min-height: 100vh;
         }
-
         h1 {
             text-align: center;
             color: #2c3e50;
             margin-bottom: 20px;
         }
-
         video {
             width: 100%;
             max-width: 800px;
@@ -31,12 +29,10 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-
         .download-links {
             display: flex;
             gap: 15px;
         }
-
         a {
             text-decoration: none;
             background-color: #3498db;
@@ -46,11 +42,9 @@
             font-weight: bold;
             transition: background-color 0.3s ease;
         }
-
         a:hover {
             background-color: #2980b9;
         }
-
         @media (max-width: 600px) {
             .download-links {
                 flex-direction: column;
@@ -60,14 +54,50 @@
     </style>
 </head>
 <body>
-    <h1>🚀 Lecture Player</h1>
-    <video controls>
-        <source src="lecture.mp4" type="video/mp4">
+    <h1 id="lecture-title">🚀 Lecture Player</h1>
+    <video id="lecture-video" controls>
         Your browser does not support the video tag.
     </video>
     <div class="download-links">
-        <a href="lecture.mp4" download>Download Video</a>
-        <a href="notes.pdf" download>Download Notes</a>
+        <a id="download-video-link" href="#" download>Download Video</a>
+        <a id="download-notes-link" href="#" download>Download Notes</a>
     </div>
+
+    <script>
+        // This script makes your player dynamic!
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoUrl = urlParams.get('video');
+            const pdfUrl = urlParams.get('pdf');
+            const title = urlParams.get('title');
+
+            // 2. Find the elements on the page
+            const videoElement = document.getElementById('lecture-video');
+            const titleElement = document.getElementById('lecture-title');
+            const videoLink = document.getElementById('download-video-link');
+            const notesLink = document.getElementById('download-notes-link');
+
+            // 3. Update the page content with the new data
+            if (videoUrl) {
+                videoElement.src = videoUrl;
+                videoLink.href = videoUrl;
+            } else {
+                titleElement.textContent = 'No video link provided!';
+            }
+
+            if (pdfUrl) {
+                notesLink.href = pdfUrl;
+            } else {
+                // Optionally hide the notes button if no PDF link is provided
+                notesLink.style.display = 'none';
+            }
+            
+            if (title) {
+                titleElement.textContent = title;
+                document.title = title; // Also update the browser tab title
+            }
+        });
+    </script>
 </body>
 </html>
