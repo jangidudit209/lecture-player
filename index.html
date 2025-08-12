@@ -41,6 +41,7 @@
         video {
             width: 100%;
             height: auto;
+            background-color: #000;
         }
         .buttons {
             display: flex;
@@ -56,6 +57,7 @@
             cursor: pointer;
             font-size: 16px;
             text-decoration: none;
+            text-align: center;
         }
         .download-btn:hover {
             background-color: #0056b3;
@@ -70,15 +72,18 @@
                 width: 100%;
             }
             .buttons {
-                flex-direction: row;
+                flex-direction: column;
                 gap: 10px;
+            }
+            .download-btn {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="title">
-        <span class="pin-icon">📌</span> <!-- Using emoji for pin icon; can replace with SVG if needed -->
+        <span class="pin-icon">📌</span>
         <span id="lecture-title">Lecture Player</span>
     </div>
     <div class="video-container">
@@ -114,6 +119,8 @@
         if (params.title) {
             lectureTitle.textContent = decodeURIComponent(params.title).toUpperCase();
             document.title = decodeURIComponent(params.title);
+        } else {
+            lectureTitle.textContent = "Lecture Player";
         }
 
         if (params.video) {
@@ -124,7 +131,7 @@
                 console.error('Autoplay failed:', error);
             });
             downloadVideo.href = videoUrl;
-            downloadVideo.download = 'lecture_video.webm'; // Suggest filename
+            downloadVideo.download = 'lecture_video.webm'; // Suggested filename
         } else {
             document.querySelector('.video-container').innerHTML = '<p class="error">No video URL provided.</p>';
             downloadVideo.style.display = 'none';
@@ -133,13 +140,36 @@
         if (params.pdf) {
             const pdfUrl = decodeURIComponent(params.pdf);
             downloadNotes.href = pdfUrl;
-            downloadNotes.download = 'lecture_notes.pdf'; // Suggest filename
+            downloadNotes.download = 'lecture_notes.pdf'; // Suggested filename
         } else {
             downloadNotes.style.display = 'none';
         }
 
-        // Fullscreen handler for mobile
-        videoPlayer.addEventListener('fullscreenchange', () => {
+        // Enable full-screen support
+        videoPlayer.addEventListener('loadedmetadata', () => {
+            if (videoPlayer.controls) {
+                // Ensure full-screen is available (browser-dependent)
+                videoPlayer.controlsList = 'nodownload'; // Optional: hide download button if needed
+            }
+        });
+
+        // Trigger full-screen on user action (mobile-friendly)
+        videoPlayer.addEventListener('click', () => {
+            if (videoPlayer.requestFullscreen) {
+                videoPlayer.requestFullscreen().catch(err => {
+                    console.error('Full-screen request failed:', err);
+                });
+            } else if (videoPlayer.webkitRequestFullscreen) { /* Safari */
+                videoPlayer.webkitRequestFullscreen();
+            } else if (videoPlayer.mozRequestFullScreen) { /* Firefox */
+                videoPlayer.mozRequestFullScreen();
+            } else if (videoPlayer.msRequestFullscreen) { /* IE/Edge */
+                videoPlayer.msRequestFullscreen();
+            }
+        });
+
+        // Exit full-screen handler
+        document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement) {
                 videoPlayer.style.height = 'auto';
             }
