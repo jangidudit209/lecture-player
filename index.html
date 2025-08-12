@@ -3,95 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Lecture Player</title>
+    <title>Lecture Player</title>
     <style>
         body {
+            margin: 0;
+            padding: 0;
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
-            margin: 0;
-            padding: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
         }
-        h1 {
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
             text-align: center;
-            color: #2c3e50;
-            margin-bottom: 20px;
+        }
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .video-section, .pdf-section {
+            flex: 1;
+            padding: 10px;
+            box-sizing: border-box;
         }
         video {
             width: 100%;
-            max-width: 800px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            height: auto;
+            max-height: 100%;
+            background-color: black;
         }
-        .download-links {
-            display: flex;
-            gap: 15px;
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
-        a {
-            text-decoration: none;
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-        a:hover {
-            background-color: #2980b9;
-        }
-        @media (max-width: 600px) {
-            .download-links {
+        @media (max-width: 768px) {
+            .container {
                 flex-direction: column;
-                gap: 10px;
             }
+            .video-section {
+                order: 1;
+                height: 50vh; /* Video takes half screen on mobile */
+            }
+            .pdf-section {
+                order: 2;
+                height: 50vh; /* PDF below video */
+                overflow-y: auto;
+            }
+            video {
+                height: 100%; /* Ensure video fills its section */
+            }
+        }
+        .error {
+            color: red;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <h1 id="lecture-title">🚀 Lecture Player</h1>
-    <video id="lecture-video" controls>
-        Your browser does not support the video tag.
-    </video>
-    <div class="download-links">
-        <a id="download-video-link" href="#" download>Download Video</a>
-        <a id="download-notes-link" href="#" download>Download Notes</a>
+    <header id="title-header">Lecture Player</header>
+    <div class="container">
+        <div class="video-section">
+            <video id="video-player" controls playsinline>
+                <source id="video-source" src="" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="pdf-section">
+            <iframe id="pdf-viewer" src=""></iframe>
+        </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const videoUrl = urlParams.get('video');
-            const pdfUrl = urlParams.get('pdf');
-            const title = urlParams.get('title');
+        // Function to get query parameters
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                video: params.get('video'),
+                pdf: params.get('pdf'),
+                title: params.get('title')
+            };
+        }
 
-            const videoElement = document.getElementById('lecture-video');
-            const titleElement = document.getElementById('lecture-title');
-            const videoLink = document.getElementById('download-video-link');
-            const notesLink = document.getElementById('download-notes-link');
+        // Load parameters and set sources
+        const params = getQueryParams();
+        const videoPlayer = document.getElementById('video-player');
+        const videoSource = document.getElementById('video-source');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const titleHeader = document.getElementById('title-header');
 
-            if (videoUrl) {
-                videoElement.src = videoUrl;
-                videoLink.href = videoUrl;
-            } else {
-                titleElement.textContent = 'No video link provided!';
-            }
+        if (params.title) {
+            titleHeader.textContent = decodeURIComponent(params.title);
+            document.title = decodeURIComponent(params.title);
+        }
 
-            if (pdfUrl) {
-                notesLink.href = pdfUrl;
-            } else {
-                // Agar PDF ka link nahi hai, to button hide kar do
-                notesLink.style.display = 'none';
-            }
-            
-            if (title) {
-                titleElement.textContent = title;
-                document.title = title;
+        if (params.video) {
+            videoSource.src = decodeURIComponent(params.video);
+            videoPlayer.load();
+            videoPlayer.play().catch(error => {
+                console.error('Autoplay failed:', error);
+            });
+        } else {
+            document.querySelector('.video-section').innerHTML = '<p class="error">No video URL provided.</p>';
+        }
+
+        if (params.pdf) {
+            pdfViewer.src = decodeURIComponent(params.pdf) + '#toolbar=0&navpanes=0&scrollbar=0'; // Hide PDF toolbar for cleaner view
+        } else {
+            document.querySelector('.pdf-section').innerHTML = '<p class="error">No PDF URL provided.</p>';
+        }
+
+        // Fullscreen handler for mobile
+        videoPlayer.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                videoPlayer.style.height = 'auto';
             }
         });
     </script>
