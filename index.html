@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture Player</title>
+    <style>
+        /* CSS styles go here */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: sans-serif;
+            color: #fff;
+        }
+
+        #player-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px; /* Example max width */
+            background-color: #333;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #video-player {
+            width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            display: block;
+            background-color: black;
+        }
+
+        #pdf-viewer {
+            width: 100%;
+            height: 500px; /* Adjust as needed */
+            background-color: #fff;
+            overflow: auto;
+            border-top: 1px solid #444;
+        }
+
+        /* Controls styling */
+        .controls {
+            padding: 10px;
+            background-color: #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* For smaller screens */
+        }
+
+        .controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+
+        .controls .message {
+            flex-grow: 1;
+            text-align: center;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        /* Fullscreen specific styles */
+        #player-container:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain; /* Or cover */
+            border-radius: 0;
+        }
+        #player-container:-moz-full-screen {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            border-radius: 0;
+        }
+        #player-container:-ms-fullscreen {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            border-radius: 0;
+        }
+        #player-container:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            border-radius: 0;
+        }
+
+        /* Hide default video controls when custom controls are present */
+        video::-webkit-media-controls {
+            display: none !important;
+        }
+        video::-webkit-media-controls-enclosure {
+            display: none !important;
+        }
+        video::-webkit-media-controls-panel {
+            display: none !important;
+        }
+        video::-webkit-media-controls-play-button {
+            display: none !important;
+        }
+        video::-webkit-media-controls-current-time-display {
+            display: none !important;
+        }
+        video::-webkit-media-controls-time-remaining-display {
+            display: none !important;
+        }
+        video::-webkit-media-controls-timeline {
+            display: none !important;
+        }
+        video::-webkit-media-controls-volume-slider {
+            display: none !important;
+        }
+        video::-webkit-media-controls-mute-button {
+            display: none !important;
+        }
+        video::-webkit-media-controls-fullscreen-button {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="player-container">
+        <div class="header">
+            <h1><span class="rocket">🚀</span><span id="lecture-title">LECTURE PLAYER</span></h1>
+        </div>
+        <video id="video-player" controls playsinline>
+            <!-- Video source will be set by JavaScript from URL parameter -->
+            Your browser does not support the video tag.
+        </video>
+        <div id="pdf-viewer">
+            <!-- PDF will be loaded here -->
+        </div>
+        <div class="download-buttons">
+            <button id="download-video">Download Video</button>
+            <button id="download-notes">Download Notes</button>
+        </div>
+    </div>
+
+    <script>
+        /* JavaScript code goes here */
+        document.addEventListener('DOMContentLoaded', () => {
+            const videoPlayer = document.getElementById('video-player');
+            const pdfViewer = document.getElementById('pdf-viewer');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const timeDisplay = document.getElementById('time-display');
+            const playerContainer = document.getElementById('player-container');
+            const playerMessage = document.getElementById('player-message');
+
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoUrl = urlParams.get('video');
+            const pdfUrl = urlParams.get('pdf');
+            const title = urlParams.get('title');
+
+            // Set document title and header
+            if (title) {
+                document.title = decodeURIComponent(title);
+                document.getElementById('lecture-title').textContent = decodeURIComponent(title).toUpperCase();
+            }
+
+            // Load Video
+            if (videoUrl) {
+                videoPlayer.src = decodeURIComponent(videoUrl);
+                videoPlayer.load();
+                videoPlayer.style.display = 'block';
+            } else {
+                videoPlayer.style.display = 'none';
+            }
+
+            // Load PDF
+            if (pdfUrl) {
+                pdfViewer.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(decodeURIComponent(pdfUrl))}&embedded=true" style="width:100%; height:100%; border: none;"></iframe>`;
+                pdfViewer.style.display = 'block';
+            } else {
+                pdfViewer.style.display = 'none';
+            }
+
+            // Download buttons functionality
+            const downloadVideoBtn = document.getElementById('download-video');
+            const downloadNotesBtn = document.getElementById('download-notes');
+
+            downloadVideoBtn.addEventListener('click', () => {
+                if (videoUrl) {
+                    const link = document.createElement('a');
+                    link.href = decodeURIComponent(videoUrl);
+                    link.download = 'lecture-video.mp4';
+                    link.click();
+                }
+            });
+
+            downloadNotesBtn.addEventListener('click', () => {
+                if (pdfUrl) {
+                    const link = document.createElement('a');
+                    link.href = decodeURIComponent(pdfUrl);
+                    link.download = 'lecture-notes.pdf';
+                    link.click();
+                }
+            });
+
+            // Enhanced fullscreen functionality for better mobile support
+            videoPlayer.addEventListener('dblclick', () => {
+                if (!document.fullscreenElement) {
+                    if (videoPlayer.requestFullscreen) {
+                        videoPlayer.requestFullscreen();
+                    } else if (videoPlayer.webkitRequestFullscreen) {
+                        videoPlayer.webkitRequestFullscreen();
+                    } else if (videoPlayer.msRequestFullscreen) {
+                        videoPlayer.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            });
+
+            // Handle video errors
+            videoPlayer.addEventListener('error', (e) => {
+                console.error('Video Error:', e.target.error);
+            });
+        });
+    </script>
+</body>
+</html>
