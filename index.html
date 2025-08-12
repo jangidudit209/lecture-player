@@ -64,21 +64,17 @@
     </div>
 
     <script>
-        // This script makes your player dynamic!
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const videoUrl = urlParams.get('video');
             const pdfUrl = urlParams.get('pdf');
             const title = urlParams.get('title');
 
-            // 2. Find the elements on the page
             const videoElement = document.getElementById('lecture-video');
             const titleElement = document.getElementById('lecture-title');
             const videoLink = document.getElementById('download-video-link');
             const notesLink = document.getElementById('download-notes-link');
 
-            // 3. Update the page content with the new data
             if (videoUrl) {
                 videoElement.src = videoUrl;
                 videoLink.href = videoUrl;
@@ -89,13 +85,13 @@
             if (pdfUrl) {
                 notesLink.href = pdfUrl;
             } else {
-                // Optionally hide the notes button if no PDF link is provided
+                // Agar PDF ka link nahi hai, to button hide kar do
                 notesLink.style.display = 'none';
             }
             
             if (title) {
                 titleElement.textContent = title;
-                document.title = title; // Also update the browser tab title
+                document.title = title;
             }
         });
     </script>
